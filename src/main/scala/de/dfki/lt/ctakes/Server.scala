@@ -11,7 +11,12 @@ import spray.can.server.ServerSettings
 import spray.http.HttpEntity
 import spray.http.ContentTypes._
 import spray.routing.SimpleRoutingApp
+import org.json.simple.JSONArray
+import org.json.simple.JSONObject
+import org.json.simple.JSONValue
+import org.json.simple.parser.JSONParser
 import spray.json._
+import java.util.Iterator
 
 
 import scala.collection.mutable
@@ -48,7 +53,8 @@ object Server extends SimpleRoutingApp  {
               jcas.reset()
               jcas.setDocumentText(text.getOrElse("You have to provide a 'text' as input!"))
               ae.process(jcas)
-              complete(HttpEntity(`application/json`, cas2FeatureMap(jcas).toString()))
+	      val json_string = cas2FeatureMap(jcas).toString()
+              complete(HttpEntity(`application/json`, json_string))
             } catch {
               case t: Throwable => complete(t.getMessage)
             }
@@ -76,7 +82,8 @@ object Server extends SimpleRoutingApp  {
     val bf= mutable.ListBuffer[JsValue]()
     while (anIter.isValid) {
       val annot = anIter.get()
-      bf += Map("typ" -> annot.getType.getName.toJson, "annotation" -> featureStructure2Map(annot)).toJson
+      if(annot.getType.getName.toString() contains "Mention"){
+      bf += Map("typ" -> annot.getType.getName.toJson, "annotation" -> featureStructure2Map(annot)).toJson }
       anIter.moveToNext()
     }
     bf.result().toJson
