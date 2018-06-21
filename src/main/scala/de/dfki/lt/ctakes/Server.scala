@@ -17,11 +17,11 @@ import org.json.simple.JSONValue
 import org.json.simple.parser.JSONParser
 import spray.json._
 import java.util.Iterator
-
+import de.dfki.lt.ctakes.MySslConfiguration
 
 import scala.collection.mutable
 
-object Server extends SimpleRoutingApp  {
+object Server extends SimpleRoutingApp with MySslConfiguration{
   implicit val system = ActorSystem("CTakes-REST")
 
   import DefaultJsonProtocol._
@@ -45,7 +45,7 @@ object Server extends SimpleRoutingApp  {
       .withFallback(ConfigFactory.defaultReference())
     val settings = ServerSettings.fromSubConfig(conf.getConfig("spray.can.server"))
 
-    startServer(interface = url, port = port, settings = Some(settings)) {
+    startServer(interface = url, port = port, settings = Some(settings.copy(sslEncryption=true))) {
       path("ctakes") {
         get {
           parameter('text ?) { text =>
