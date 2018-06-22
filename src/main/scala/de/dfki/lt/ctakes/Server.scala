@@ -10,6 +10,7 @@ import org.apache.uima.util.XMLInputSource
 import spray.can.server.ServerSettings
 import spray.http.HttpEntity
 import spray.http.ContentTypes._
+import spray.http.HttpHeaders._
 import spray.routing.SimpleRoutingApp
 import org.json.simple.JSONArray
 import org.json.simple.JSONObject
@@ -66,8 +67,11 @@ object Server extends SimpleRoutingApp with MySslConfiguration{
               jcas.reset()
               jcas.setDocumentText(text)
               ae.process(jcas)
+		respondWithHeader(RawHeader("Access-Control-Allow-Origin","*")){
               complete(HttpEntity(`application/json`, cas2FeatureMap(jcas).toString()))
-            } catch {
+            }
+		}
+		 catch {
               case t: Throwable => complete(t.getMessage)
             }
           }
